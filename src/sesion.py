@@ -26,5 +26,4 @@ def leer_historial(session_id):
     if sesionRedis:
         return json.loads(sesionRedis)
     else:
-        return []
-    
+        return []   

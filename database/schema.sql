@@ -37,3 +37,7 @@ CREATE TABLE reembolsos(
     motivo VARCHAR(140),
     fecha DATE
 );
+
+
+/* Modificacion de tabla original "productos" para evitar comparacion estricta de strings*/ 
+ALTER TABLE productos ADD COLUMN descripcion TEXT;

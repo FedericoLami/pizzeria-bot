@@ -27,3 +27,14 @@ def leer_historial(session_id):
         return json.loads(sesionRedis)
     else:
         return []   
+    
+def guardar_estado_pedido(id_pedido,estado_pedido):
+    redisClient.set("pedido:" + id_pedido, estado_pedido)
+
+
+def leer_estado_pedido(id_pedido):
+    pedido = redisClient.get("pedido:" + id_pedido)     
+    if pedido:
+        return pedido
+    else:
+        return None

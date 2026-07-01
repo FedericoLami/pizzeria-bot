@@ -18,3 +18,13 @@ def obtener_productos():
     pgCursor.execute("SELECT nombreProducto, disponible, monto, descripcion FROM productos")
     resultados = pgCursor.fetchall()
     return resultados
+
+def obtener_pedido(id_pedido):
+    pgCursor.execute("""
+                    SELECT pedido.idPedido, pedido.fecha, detallePedido.idProducto, detallePedido.cantidad
+                    FROM pedido
+                    JOIN detallePedido ON pedido.idPedido = detallePedido.idPedido
+                    WHERE pedido.idPedido = %s
+                    """,(id_pedido,))
+    resultados = pgCursor.fetchall()
+    return resultados

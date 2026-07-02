@@ -1,5 +1,7 @@
 import anthropic
 from dotenv import load_dotenv
+from postgres import obtener_pedido, obtener_productos
+from sesion import leer_estado_pedido
 
 load_dotenv()
 
@@ -33,3 +35,17 @@ def nodo_clasificador(estado):
 
     estado["categoria"] = answer.content[0].text
     return estado 
+
+def nodo_buscador(estado):
+    categoria = estado["categoria"]
+
+    if categoria == "consulta_producto":
+        estado["informacion"] = str(obtener_productos())
+    elif categoria in ["reclamo","reembolso","modificar_pedido"]:
+        estado["informacion"] = str(obtener_pedido(estado["consulta"]))
+    elif categoria == "consulta_envio":
+        estado["informacion"] = str(leer_estado_pedido(estado["consulta"]))
+    else:
+        estado["informacion"] = ""
+
+    return estado

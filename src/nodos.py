@@ -49,3 +49,29 @@ def nodo_buscador(estado):
         estado["informacion"] = ""
 
     return estado
+
+
+def nodo_redactor(estado):
+    mensajes = [{"role": "user", "content": f"Consulta del cliente: {estado['consulta']}\nCategoría: {estado['categoria']}\nInformación disponible: {estado['informacion']}"}]
+
+    answer = client.messages.create(
+        model = "claude-haiku-4-5",
+        max_tokens = 1024,
+        system = """
+                Sos un agente de atención al cliente de una pizzería. Tu tarea es redactar una respuesta profesional, empática y clara al cliente basándote en su consulta, la categoría detectada y la información disponible.
+                Reglas importantes:
+                - Respondé siempre en español
+                - Sé empático y cordial, recordá que el cliente puede estar frustrado
+                - Si la categoría es 'consulta_producto', usá la información del menú para responder con nombres, precios y disponibilidad. Si el producto que menciona el cliente no coincide exactamente con el menú, intentá matchearlo por similitud y confirmá con el cliente si es ese el producto que busca
+                - Si la categoría es 'reclamo' o 'reembolso', pedile al cliente el número de pedido si no lo proporcionó
+                - Si la categoría es 'consulta_envio' o 'modificar_pedido', informá el estado actual del pedido basándote en la información disponible
+                - Si la categoría es 'spam', respondé brevemente que el mensaje no corresponde a una consulta válida
+                - Para reclamos generales sin pedido vinculado, indicá al cliente que se comunique directamente con el local
+                - Nunca inventes información que no esté en los datos provistos
+                - No hagas preguntas de seguimiento al final de tu respuesta
+             """,
+        messages = mensajes
+    )
+
+    estado["respuesta"] = answer.content[0].text
+    return estado 

@@ -75,3 +75,26 @@ def nodo_redactor(estado):
 
     estado["respuesta"] = answer.content[0].text
     return estado 
+
+def nodo_revisor(estado):
+    mensajes = [{"role": "user", "content": f"Consulta del cliente: {estado['consulta']}\nRespuesta: {estado['respuesta']}"}]
+    answer = client.messages.create(
+        model = "claude-haiku-4-5",
+        max_tokens = 1024,
+        system = """
+                Sos un revisor de calidad de respuestas de atención al cliente de una pizzería.
+                Recibís una consulta del cliente y la respuesta redactada por otro agente.
+                Tu tarea es verificar que la respuesta sea:
+                - Empática y cordial
+                - Correcta según la consulta del cliente
+                - Clara y sin información inventada
+                - Sin preguntas de seguimiento al final
+
+                Si la respuesta está bien, devolvela tal cual.
+                Si necesita mejoras, corregila y devolvé la versión mejorada.
+                Respondé únicamente con la respuesta final al cliente, sin explicaciones adicionales.             """,
+        messages = mensajes
+    )
+
+    estado["respuesta_final"] = answer.content[0].text
+    return estado 

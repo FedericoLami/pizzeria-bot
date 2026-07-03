@@ -1,14 +1,14 @@
 import anthropic
 from dotenv import load_dotenv
-from postgres import obtener_pedido, obtener_productos
-from sesion import leer_estado_pedido
+from src.postgres import obtener_pedido, obtener_productos
+from src.sesion import leer_estado_pedido
 
 load_dotenv()
 
 client = anthropic.Anthropic()
 
 def nodo_clasificador(estado):
-    estado["historial"].append({"role":"user","content":estado["consulta"]})
+    estado["historial"].append({"role": "user", "content": estado["consulta"]})
     mensajes = estado["historial"]
 
     answer = client.messages.create(
@@ -34,7 +34,7 @@ def nodo_clasificador(estado):
     )
 
     estado["categoria"] = answer.content[0].text
-    return estado 
+    return estado
 
 def nodo_buscador(estado):
     categoria = estado["categoria"]
@@ -52,7 +52,7 @@ def nodo_buscador(estado):
 
 
 def nodo_redactor(estado):
-    mensajes = [{"role": "user", "content": f"Consulta del cliente: {estado['consulta']}\nCategoría: {estado['categoria']}\nInformación disponible: {estado['informacion']}"}]
+    mensajes = estado["historial"] + [{"role": "user", "content": f"Categoría: {estado['categoria']}\nInformación disponible: {estado['informacion']}"}]
 
     answer = client.messages.create(
         model = "claude-haiku-4-5",
@@ -62,6 +62,7 @@ def nodo_redactor(estado):
                 Reglas importantes:
                 - Respondé siempre en español
                 - Sé empático y cordial, recordá que el cliente puede estar frustrado
+                - Sé conciso y directo. Evitá adjetivos innecesarios como "deliciosa", "exquisita" o frases de relleno. El cliente quiere información, no publicidad.
                 - Si la categoría es 'consulta_producto', usá la información del menú para responder con nombres, precios y disponibilidad. Si el producto que menciona el cliente no coincide exactamente con el menú, intentá matchearlo por similitud y confirmá con el cliente si es ese el producto que busca
                 - Si la categoría es 'reclamo' o 'reembolso', pedile al cliente el número de pedido si no lo proporcionó
                 - Si la categoría es 'consulta_envio' o 'modificar_pedido', informá el estado actual del pedido basándote en la información disponible
@@ -74,7 +75,7 @@ def nodo_redactor(estado):
     )
 
     estado["respuesta"] = answer.content[0].text
-    return estado 
+    return estado
 
 def nodo_revisor(estado):
     mensajes = [{"role": "user", "content": f"Consulta del cliente: {estado['consulta']}\nRespuesta: {estado['respuesta']}"}]
@@ -92,9 +93,11 @@ def nodo_revisor(estado):
 
                 Si la respuesta está bien, devolvela tal cual.
                 Si necesita mejoras, corregila y devolvé la versión mejorada.
-                Respondé únicamente con la respuesta final al cliente, sin explicaciones adicionales.             """,
+                Respondé únicamente con la respuesta final al cliente, sin explicaciones adicionales.
+             """,
         messages = mensajes
     )
 
     estado["respuesta_final"] = answer.content[0].text
-    return estado 
+    estado["historial"].append({"role": "assistant", "content": estado["respuesta_final"]})
+    return estado

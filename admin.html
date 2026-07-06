@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🍕 Admin — La Bella Napoli</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --crust:    #1a0f00;
+      --tomato:   #c0392b;
+      --tomato-2: #e74c3c;
+      --cheese:   #f5a623;
+      --basil:    #2d6a4f;
+      --cream:    #fff8f0;
+      --smoke:    #f0e6d3;
+      --border:   #e8d5b7;
+      --ink:      #1a0f00;
+      --ink-2:    #6b4c2a;
+      --ink-3:    #b8956a;
+      --serif:    'Playfair Display', serif;
+      --sans:     'DM Sans', sans-serif;
+      --mono:     'DM Mono', monospace;
+    }
+
+    body {
+      background: var(--cream);
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 14px;
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--crust);
+      padding: 0 2rem;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      position: relative;
+    }
+
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--tomato), var(--cheese), var(--tomato));
+    }
+
+    .brand-name {
+      font-family: var(--serif);
+      font-size: 1.3rem;
+      color: var(--cream);
+    }
+
+    .brand-name span { color: var(--cheese); }
+
+    .admin-badge {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--cheese);
+      border: 1px solid rgba(245,166,35,0.3);
+      padding: 0.2rem 0.65rem;
+      border-radius: 100px;
+      letter-spacing: 0.06em;
+    }
+
+    .header-link {
+      margin-left: auto;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--ink-3);
+      text-decoration: none;
+      letter-spacing: 0.06em;
+      transition: color 0.15s;
+    }
+
+    .header-link:hover { color: var(--cream); }
+
+    .container {
+      max-width: 800px;
+      margin: 2.5rem auto;
+      padding: 0 2rem 3rem;
+    }
+
+    .page-title {
+      font-family: var(--serif);
+      font-size: 1.6rem;
+      color: var(--ink);
+      margin-bottom: 0.4rem;
+    }
+
+    .page-sub {
+      font-size: 0.78rem;
+      color: var(--ink-2);
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    .toast {
+      position: fixed;
+      top: 1.5rem;
+      right: 1.5rem;
+      background: var(--crust);
+      color: var(--cream);
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-family: var(--mono);
+      opacity: 0;
+      transform: translateY(-8px);
+      transition: all 0.25s;
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    .toast.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast.error { background: var(--tomato); }
+
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      color: var(--ink-3);
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+    }
+
+    .product-card {
+      background: white;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .product-card:hover {
+      border-color: var(--ink-3);
+      box-shadow: 0 2px 8px rgba(26,15,0,0.06);
+    }
+
+    .product-card.unavailable {
+      opacity: 0.6;
+    }
+
+    .product-emoji {
+      font-size: 1.8rem;
+      flex-shrink: 0;
+    }
+
+    .product-info { flex: 1; }
+
+    .product-name {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--ink);
+      margin-bottom: 0.2rem;
+    }
+
+    .product-desc {
+      font-size: 0.72rem;
+      color: var(--ink-2);
+      line-height: 1.5;
+      margin-bottom: 0.3rem;
+    }
+
+    .product-price {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--ink-3);
+    }
+
+    .product-status {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      padding: 0.2rem 0.65rem;
+      border-radius: 100px;
+      letter-spacing: 0.05em;
+      flex-shrink: 0;
+    }
+
+    .product-status.available {
+      background: rgba(45, 106, 79, 0.1);
+      color: var(--basil);
+      border: 1px solid rgba(45, 106, 79, 0.25);
+    }
+
+    .product-status.unavailable {
+      background: rgba(192, 57, 43, 0.08);
+      color: var(--tomato);
+      border: 1px solid rgba(192, 57, 43, 0.2);
+    }
+
+    /* TOGGLE */
+    .toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    .toggle {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      cursor: pointer;
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      background: var(--border);
+      border-radius: 100px;
+      transition: background 0.2s;
+    }
+
+    .toggle input:checked + .toggle-track {
+      background: var(--basil);
+    }
+
+    .toggle-thumb {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .toggle input:checked ~ .toggle-thumb {
+      transform: translateX(20px);
+    }
+
+    .toggle-label {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--ink-3);
+      letter-spacing: 0.05em;
+      width: 60px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <span class="brand-name">La <span>Bella</span> Napoli</span>
+  <span class="admin-badge">panel admin</span>
+  <a href="/" class="header-link">← volver al chat</a>
+</header>
+
+<div class="toast" id="toast"></div>
+
+<div class="container">
+  <div class="page-title">Gestión de productos</div>
+  <div class="page-sub">Activá o desactivá los productos del menú. Los cambios se reflejan de inmediato en el bot de atención al cliente.</div>
+
+  <div id="productList">
+    <div class="loading">cargando productos...</div>
+  </div>
+</div>
+
+<script>
+  const API = ''
+
+  function showToast(msg, error = false) {
+    const t = document.getElementById('toast')
+    t.textContent = msg
+    t.className = `toast visible${error ? ' error' : ''}`
+    setTimeout(() => t.className = 'toast', 2500)
+  }
+
+  function formatPrice(monto) {
+    return '$' + Number(monto).toLocaleString('es-AR')
+  }
+
+  async function toggleDisponible(idProducto, nuevoValor, card, statusEl, labelEl) {
+    try {
+      const res = await fetch(`${API}/admin/productos/${idProducto}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ disponible: nuevoValor })
+      })
+      if (!res.ok) throw new Error()
+
+      card.classList.toggle('unavailable', !nuevoValor)
+      statusEl.textContent = nuevoValor ? 'disponible' : 'no disponible'
+      statusEl.className = `product-status ${nuevoValor ? 'available' : 'unavailable'}`
+      labelEl.textContent = nuevoValor ? 'activo' : 'inactivo'
+      showToast(nuevoValor ? '✓ Producto activado' : '✓ Producto desactivado')
+    } catch {
+      showToast('Error al actualizar', true)
+    }
+  }
+
+  async function cargarProductos() {
+    try {
+      const res = await fetch(`${API}/admin/productos`)
+      if (!res.ok) throw new Error()
+      const data = await res.json()
+
+      const list = document.getElementById('productList')
+      list.innerHTML = ''
+
+      // data.productos es una lista de tuplas: (nombreProducto, idProducto, disponible, monto, descripcion)
+      data.productos.forEach(([nombre, id, disponible, monto, descripcion]) => {
+        const card = document.createElement('div')
+        card.className = `product-card${!disponible ? ' unavailable' : ''}`
+
+        const statusEl = document.createElement('span')
+        statusEl.className = `product-status ${disponible ? 'available' : 'unavailable'}`
+        statusEl.textContent = disponible ? 'disponible' : 'no disponible'
+
+        const labelEl = document.createElement('span')
+        labelEl.className = 'toggle-label'
+        labelEl.textContent = disponible ? 'activo' : 'inactivo'
+
+        card.innerHTML = `
+          <div class="product-emoji">🍕</div>
+          <div class="product-info">
+            <div class="product-name">${nombre}</div>
+            <div class="product-desc">${descripcion || 'Sin descripción'}</div>
+            <div class="product-price">${formatPrice(monto)}</div>
+          </div>`
+
+        card.appendChild(statusEl)
+
+        const toggleWrap = document.createElement('div')
+        toggleWrap.className = 'toggle-wrap'
+
+        const toggleLabel = document.createElement('label')
+        toggleLabel.className = 'toggle'
+
+        const input = document.createElement('input')
+        input.type = 'checkbox'
+        input.checked = disponible
+        input.addEventListener('change', () => {
+          toggleDisponible(id, input.checked, card, statusEl, labelEl)
+        })
+
+        const track = document.createElement('div')
+        track.className = 'toggle-track'
+
+        const thumb = document.createElement('div')
+        thumb.className = 'toggle-thumb'
+
+        toggleLabel.appendChild(input)
+        toggleLabel.appendChild(track)
+        toggleLabel.appendChild(thumb)
+
+        toggleWrap.appendChild(labelEl)
+        toggleWrap.appendChild(toggleLabel)
+        card.appendChild(toggleWrap)
+        list.appendChild(card)
+      })
+    } catch {
+      document.getElementById('productList').innerHTML =
+        '<div class="loading">Error al cargar productos. Verificá que el servidor esté corriendo.</div>'
+    }
+  }
+
+  cargarProductos()
+</script>
+</body>
+</html>

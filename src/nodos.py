@@ -44,7 +44,7 @@ def nodo_buscador(estado):
     elif categoria in ["reclamo","reembolso","modificar_pedido"]:
         estado["informacion"] = str(obtener_pedido(estado["consulta"]))
     elif categoria == "consulta_envio":
-        estado["informacion"] = str(leer_estado_pedido(estado["consulta"]))
+        estado["informacion"] = ""
     else:
         estado["informacion"] = ""
 
@@ -65,11 +65,11 @@ def nodo_redactor(estado):
                 - Sé conciso y directo. Evitá adjetivos innecesarios como "deliciosa", "exquisita" o frases de relleno. El cliente quiere información, no publicidad.
                 - Si la categoría es 'consulta_producto', usá la información del menú para responder con nombres, precios y disponibilidad. Si el producto que menciona el cliente no coincide exactamente con el menú, intentá matchearlo por similitud y confirmá con el cliente si es ese el producto que busca
                 - Si la categoría es 'reclamo' o 'reembolso', pedile al cliente el número de pedido si no lo proporcionó
-                - Si la categoría es 'consulta_envio' o 'modificar_pedido', informá el estado actual del pedido basándote en la información disponible
                 - Si la categoría es 'spam', respondé brevemente que el mensaje no corresponde a una consulta válida
                 - Para reclamos generales sin pedido vinculado, indicá al cliente que se comunique directamente con el local
                 - Nunca inventes información que no esté en los datos provistos
                 - No hagas preguntas de seguimiento al final de tu respuesta
+                - Si la categoría es 'consulta_envio' o 'modificar_pedido', pedile al cliente su número de pedido antes de cualquier otra acción. No busques ni inventes información sobre el pedido.
              """,
         messages = mensajes
     )

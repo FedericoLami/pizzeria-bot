@@ -28,3 +28,13 @@ def obtener_pedido(id_pedido):
                     """,(id_pedido,))
     resultados = pgCursor.fetchall()
     return resultados
+
+
+def obtener_productos_admin():
+    pgCursor.execute("SELECT nombreProducto, idProducto, disponible, monto, descripcion FROM productos")
+    resultados = pgCursor.fetchall()
+    return resultados
+
+def actualizar_disponibilidad(id_producto,disponible):
+    pgCursor.execute("UPDATE productos SET disponible = %s WHERE idProducto = %s",(disponible,id_producto))
+    pgConnection.commit()

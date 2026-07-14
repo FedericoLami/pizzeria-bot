@@ -6,11 +6,15 @@ import json
 
 load_dotenv()
 
-redisClient = redis.Redis(
-    host = os.environ.get("REDIS_HOST"),
-    port = os.environ.get("REDIS_PORT"),
-    decode_responses=True
-)
+redis_url = os.environ.get("REDIS_URL")
+if redis_url:
+    redisClient = redis.Redis.from_url(redis_url, decode_responses=True)
+else:
+    redisClient = redis.Redis(
+        host=os.environ.get("REDIS_HOST"),
+        port=os.environ.get("REDIS_PORT"),
+        decode_responses=True
+    )
 
 def create_session_id(nombre):
     return nombre + "_" + str(random.randint(100000,999999))

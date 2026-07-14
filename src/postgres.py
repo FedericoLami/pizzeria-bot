@@ -4,13 +4,17 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-pgConnection = psycopg2.connect(
-    host = os.environ.get("POSTGRES_HOST"),
-    port = os.environ.get("POSTGRES_PORT"),
-    dbname = os.environ.get("POSTGRES_DB"),
-    user = os.environ.get("POSTGRES_USER"),
-    password = os.environ.get("POSTGRES_PASSWORD"),
-)
+database_url = os.environ.get("DATABASE_URL")
+if database_url:
+    pgConnection = psycopg2.connect(database_url)
+else:
+    pgConnection = psycopg2.connect(
+        host=os.environ.get("POSTGRES_HOST"),
+        port=os.environ.get("POSTGRES_PORT"),
+        dbname=os.environ.get("POSTGRES_DB"),
+        user=os.environ.get("POSTGRES_USER"),
+        password=os.environ.get("POSTGRES_PASSWORD"),
+    )
 
 pgCursor = pgConnection.cursor()
 
